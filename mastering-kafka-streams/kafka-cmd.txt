@@ -1,0 +1,55 @@
+Kafka Cluster
+=============
+Zookeeper   192.168.5.21:2181
+Broker1     192.168.5.22:9092
+Broker2     192.168.5.23:9092
+Broker3     192.168.5.24:9092
+
+-- start zookeeper
+zookeeper-server-start.sh ~/kafka_2.13-2.8.0/config/zookeeper.properties > /dev/null 2>&1 &
+
+-- start broker
+kafka-server-start.sh ~/kafka_2.13-2.8.0/config/server.properties > /dev/null 2>&1 &
+
+
+************************************************************************************************************************
+
+kafka-topics
+============
+
+-- list all topics
+kafka-topics.sh --zookeeper 192.168.5.21:2181 --list
+kafka-topics.sh --bootstrap-server 192.168.5.22:9092 --list
+
+-- describe specific topic
+kafka-topics.sh --bootstrap-server 192.168.5.22:9092 --describe --topic <topic-name>
+
+-- create topic
+kafka-topics.sh --bootstrap-server 192.168.5.22:9092 --create --topic <topic-name> --partitions 3 --replication-factor 2
+
+-- delete topic
+kafka-topics.sh --bootstrap-server 192.168.5.22:9092 --delete --topic <topic-name>
+
+
+************************************************************************************************************************
+
+kafka-console-producer
+======================
+
+-- fire event
+kafka-console-producer.sh --bootstrap-server 192.168.5.22:9092 --topic <topic-name>
+
+-- fire event with key
+kafka-console-producer.sh --bootstrap-server 192.168.5.22:9092 --property key.separator=, --property parse.key=true --topic <topic-name>
+
+
+************************************************************************************************************************
+
+kafka-console-consumer
+======================
+
+-- consume all event values
+kafka-console-consumer.sh --bootstrap-server 192.168.5.22:9092 --from-beginning --topic <topic-name>
+
+-- consume all event values & keys
+kafka-console-consumer.sh --bootstrap-server 192.168.5.22:9092 --from-beginning --property print.timestamp=true --property print.key=true --property print.value=true --topic <topic-name>
