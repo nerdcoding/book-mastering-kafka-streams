@@ -1,4 +1,16 @@
 micronaut:
   application:
-    name: ch03
-kafka.bootstrap.servers: localhost:9092
+    name: ch3-kafka-streams
+kafka:
+  bootstrap:
+    servers:
+      - 192.168.5.22:9092
+      - 192.168.5.23:9092
+      - 192.168.5.24:9092
+  streams:
+    default:
+      processing.guarantee: "exactly_once"
+      auto.offset.reset: "earliest"
+      num:
+        stream:
+          threads: 1
