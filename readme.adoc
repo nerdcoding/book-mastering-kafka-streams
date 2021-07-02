@@ -1,0 +1,76 @@
+== About
+
+Example code from the https://www.oreilly.com/library/view/mastering-kafka-streams/9781492062486/[Mastering Kafka Streams and ksqlDB, window=_blank] book.
+
+== Kafka Cluster
+
+The `docker-compose.yml` describes a simple Kafka setup consist of a `Zookeeper` installation, and a `Kafka` with one
+Broker. +
+
+* Zookeeper: 127.0.0.1 2181
+* Kafka Broker: 127.0.0.1 9092
+
+==== start cluster
+```
+docker-compose up -d
+```
+
+==== show logs
+```
+docker-compose logs kafka
+```
+
+==== console into Kafka broker
+```
+docker-compose exec kafka sh
+```
+
+
+== Working with Kafka Topics
+
+==== list all topics
+```
+kafka-topics --zookeeper 127.0.0.1:2181 --list
+kafka-topics --bootstrap-server 127.0.0.1:9092 --list
+```
+
+==== describe specific topic
+```
+kafka-topics --bootstrap-server 127.0.0.1:9092 --describe --topic <topic-name>
+```
+
+==== create topic
+```
+kafka-topics --bootstrap-server 127.0.0.1:9092 --create --topic <topic-name> --partitions 3 --replication-factor 1
+```
+
+==== delete topic
+```
+kafka-topics --bootstrap-server 127.0.0.1:9092 --delete --topic <topic-name>
+```
+
+
+== Working with Kafka producer
+
+==== fire event
+```
+kafka-console-producer --bootstrap-server 127.0.0.1:9092 --topic <topic-name>
+```
+
+==== fire event with key
+```
+kafka-console-producer --bootstrap-server 127.0.0.1:9092 --property key.separator=, --property parse.key=true --topic <topic-name>
+```
+
+
+== Working with Kafka consumer
+
+==== consume all event values
+```
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --from-beginning --topic <topic-name>
+```
+
+==== consume all event values & keys
+```
+kafka-console-consumer --bootstrap-server 127.0.0.1:9092 --from-beginning --property print.timestamp=true --property print.key=true --property print.value=true --topic <topic-name>
+```
