@@ -4,9 +4,9 @@ micronaut:
 kafka:
   bootstrap:
     servers:
-      - 192.168.5.22:9092
-      - 192.168.5.23:9092
-      - 192.168.5.24:9092
+      - 127.0.0.1:29092
+      - 127.0.0.1:39092
+      - 127.0.0.1:49092
   streams:
     default:
       processing.guarantee: "exactly_once"
