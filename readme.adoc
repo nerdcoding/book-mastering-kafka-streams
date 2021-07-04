@@ -5,12 +5,32 @@ Example code from the https://www.oreilly.com/library/view/mastering-kafka-strea
 == Kafka Cluster
 
 The `docker-compose.yml` describes a simple Kafka setup consist of a `Zookeeper` installation, and a `Kafka` with three
-Brokers. +
+Brokers.
 
-* Zookeeper: 127.0.0.1 2181
-* Kafka Broker 1: 127.0.0.1 29092
-* Kafka Broker 2: 127.0.0.1 39092
-* Kafka Broker 3: 127.0.0.1 49092
+.The Kafka cluster
+|===
+|Description | Docker container name | IP/Port for outside access | Host/Port for inside access
+
+|Zookeeper
+|`zookeeper`
+|127.0.0.1:2181
+|xookeeper:2181
+
+|Kafka Broker 1
+|`kafka-1`
+|127.0.0.1:29092
+|kafka-1:9092
+
+|Kafka Broker 2
+|`kafka-2`
+|127.0.0.1:39092
+|kafka-2:9092
+
+|Kafka Broker 3
+|`kafka-3`
+|127.0.0.1:49092
+|kafka-3:9092
+|===
 
 ==== start cluster
 ```
@@ -30,7 +50,7 @@ docker-compose exec kafka-1 sh
 
 == Working with Kafka Topics
 
-For all the following commands login to the console of the kafka-1 broker:
+For all the following commands login into the console of a broker, for example the kafka-1 broker:
 
 ```
 docker-compose exec kafka-1 sh
