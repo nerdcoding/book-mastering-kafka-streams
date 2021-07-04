@@ -1,0 +1,16 @@
+micronaut:
+  application:
+    name: ch4-kafka-streams
+kafka:
+  bootstrap:
+    servers:
+      - 127.0.0.1:29092
+      - 127.0.0.1:39092
+      - 127.0.0.1:49092
+  streams:
+    default:
+      processing.guarantee: "exactly_once"
+      auto.offset.reset: "earliest"
+      num:
+        stream:
+          threads: 1

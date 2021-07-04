@@ -1,0 +1,6 @@
+applicationType: default
+defaultPackage: org.nerdcoding.example.mks.ch04
+testFramework: junit
+sourceLanguage: java
+buildTool: maven
+features: [app-name, http-client, java, java-application, junit, kafka, kafka-streams, logback, maven, netty-server, readme, shade, yaml]
