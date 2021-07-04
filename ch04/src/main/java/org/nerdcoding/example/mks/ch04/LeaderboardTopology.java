@@ -24,11 +24,14 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.GlobalKTable;
+import org.apache.kafka.streams.kstream.Joined;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
+import org.nerdcoding.example.mks.ch04.model.Enriched;
 import org.nerdcoding.example.mks.ch04.model.Player;
 import org.nerdcoding.example.mks.ch04.model.Product;
 import org.nerdcoding.example.mks.ch04.model.ScoreEvent;
+import org.nerdcoding.example.mks.ch04.model.ScoreWithPlayer;
 import org.nerdcoding.example.mks.ch04.model.serde.JsonSerde;
 
 import io.micronaut.configuration.kafka.streams.ConfiguredStreamBuilder;
@@ -47,13 +50,16 @@ public class LeaderboardTopology {
     public static final String PRODUCT_TOPIC_NAME = "products";
 
     @Singleton
-    KStream<byte[], ScoreEvent> createLeaderboardTopology(final ConfiguredStreamBuilder streamBuilder) {
+    KStream<String, ScoreEvent> createLeaderboardTopology(final ConfiguredStreamBuilder streamBuilder) {
         addConfiguration(streamBuilder);
 
-        final KStream<byte[], ScoreEvent> scoreEvents = streamBuilder.stream(
+        final KStream<String, ScoreEvent> scoreEvents = streamBuilder.stream(
                 SCORE_EVENT_TOPIC_NAME,
                 Consumed.with(Serdes.ByteArray(), new JsonSerde<>(ScoreEvent.class))
-        );
+        )
+        // To ensure related events are routed to the same partition they must have the same key (co-partitioning).
+        // -> re-key the score event
+        .selectKey((key, value) -> value.getPlayerId().toString());
 
         final KTable<String, Player> players = streamBuilder.table(
                 PLAYER_TOPIC_NAME,
@@ -65,6 +71,34 @@ public class LeaderboardTopology {
                 Consumed.with(Serdes.String(), new JsonSerde<>(Product.class))
         );
 
+        // join ScoreEvents - Players
+        final KStream<String, ScoreWithPlayer> scoreWithPlayers = scoreEvents.join(
+                players,
+                // ValueJoiner: defines how different records (here ScoreEvent & Player) should be combined.
+                ScoreWithPlayer::new,
+                // Joined: defines the Serdes to be used to serialize/deserialize inputs of the joined streams.
+                Joined.with(
+                        Serdes.String(),
+                        new JsonSerde<>(ScoreEvent.class),
+                        new JsonSerde<>(Player.class)
+                )
+        );
+
+        // join ScoreWithPlayer - Products
+        final KStream<String, Enriched> enriched = scoreWithPlayers.join(
+                products,
+                // KeyValueMapper: maps key/value pair (from source stream) to arbitrary type (String)
+                (scoreWithPlayerKey, scoreWithPlayerValue) ->
+                        String.valueOf(scoreWithPlayerValue.getScoreEvent().getProductId()),
+                // ValueJoiner: defines how different records (here ScoreWithPlayer & Product) should be combined.
+                (scoreWithPlayer, product) -> new Enriched.EnrichedBuilder()
+                        .withPlayerId(scoreWithPlayer.getPlayer().getId())
+                        .withProductId(product.getId())
+                        .withPlayerName(scoreWithPlayer.getPlayer().getName())
+                        .withProductName(product.getName())
+                        .withScore(scoreWithPlayer.getScoreEvent().getScore())
+                        .build()
+        );
 
         return scoreEvents;
     }
