@@ -1,0 +1,49 @@
+/*
+ * ScoreEventJsonDeserializer.java
+ *
+ * Copyright (c) 2021, Tobias Koltsch. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/gpl-2.0.html>.
+ */
+
+package org.nerdcoding.example.mks.ch04.model.serde;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.kafka.common.serialization.Deserializer;
+
+import java.nio.charset.StandardCharsets;
+
+public class JsonDeserializer<T> implements Deserializer<T> {
+
+    private final ObjectMapper objectMapper;
+    private final Class<T> genericClassType;
+
+    public JsonDeserializer(final ObjectMapper objectMapper, final Class<T> genericClassType) {
+        this.objectMapper = objectMapper;
+        this.genericClassType = genericClassType;
+    }
+
+    @Override
+    public T deserialize(final String topic, final byte[] data) {
+        try {
+            return objectMapper.readValue(
+                    new String(data, StandardCharsets.UTF_8),
+                    genericClassType
+            );
+        } catch (final JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+}
