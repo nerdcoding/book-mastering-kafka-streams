@@ -24,7 +24,9 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.GlobalKTable;
+import org.apache.kafka.streams.kstream.Grouped;
 import org.apache.kafka.streams.kstream.Joined;
+import org.apache.kafka.streams.kstream.KGroupedStream;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.KTable;
 import org.nerdcoding.example.mks.ch04.model.Enriched;
@@ -87,7 +89,7 @@ public class LeaderboardTopology {
         // join ScoreWithPlayer - Products
         final KStream<String, Enriched> enriched = scoreWithPlayers.join(
                 products,
-                // KeyValueMapper: maps key/value pair (from source stream) to arbitrary type (String)
+                // KeyValueMapper: maps key/value pair (from ScoreWithPlayer stream) to key of the Product stream
                 (scoreWithPlayerKey, scoreWithPlayerValue) ->
                         String.valueOf(scoreWithPlayerValue.getScoreEvent().getProductId()),
                 // ValueJoiner: defines how different records (here ScoreWithPlayer & Product) should be combined.
@@ -99,6 +101,15 @@ public class LeaderboardTopology {
                         .withScore(scoreWithPlayer.getScoreEvent().getScore())
                         .build()
         );
+
+        // Grouping is a requirement for the following aggregation. Enforces the processing of related events by the
+        // same observer (same as re-keying).
+        final KGroupedStream<String, Enriched> groupedEnriched = enriched.groupByKey(
+                // Key- and Value Serdes for the grouped records
+                Grouped.with(Serdes.String(), new JsonSerde<>(Enriched.class))
+        );
+
+
 
         return scoreEvents;
     }
