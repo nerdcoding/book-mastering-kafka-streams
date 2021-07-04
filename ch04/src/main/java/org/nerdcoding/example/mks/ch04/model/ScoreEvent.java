@@ -69,13 +69,13 @@ public class ScoreEvent {
         private Long productId;
         private Double score;
 
-        @JsonProperty("player_id")
+        @JsonProperty("playerId")
         public ScoreEventBuilder withPlayerId(Long playerId) {
             this.playerId = playerId;
             return this;
         }
 
-        @JsonProperty("product_id")
+        @JsonProperty("productId")
         public ScoreEventBuilder withProductId(Long productId) {
             this.productId = productId;
             return this;
